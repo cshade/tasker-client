@@ -1,0 +1,19 @@
+version: "3"
+
+services:
+  tasker-client:
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+    command: npm run dev
+    image: cshade/tasker-client
+    # environment:
+    #   - NODE_ENV=development
+    # volumes:
+    #   - ./:/home/node/app
+    ports:
+      - "8080:8080"
+
+# networks:
+#   webnet:
+
