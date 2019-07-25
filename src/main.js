@@ -5,7 +5,6 @@ import moment from 'moment'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
-Vue.use(moment)
 Vue.use(BootstrapVue)
 
 Vue.component('detail-display', {

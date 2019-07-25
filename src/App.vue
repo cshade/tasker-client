@@ -73,8 +73,7 @@ import axios from 'axios'
 import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-
-var moment = require('moment');
+import moment from 'moment'
 
 // URI of the Task API
 const taskBaseURI = 'http://localhost:8082/api/tasks'
@@ -104,15 +103,17 @@ export default {
   computed: {
       // only the due tasks, filtered if chosen in the UI
       displayDueTasks() {
-        if (this.filterKey == 'overdue') {
-            return this.tasks.filter(task => moment(task.due).isBefore(moment(), 'day')).filter(task => !task.done)
-        } else if (this.filterKey == 'today') {
-            return this.tasks.filter(task => moment(task.due).isSame(moment(), 'day')).filter(task => !task.done)
-        } else if (this.filterKey == 'tomorrow') {
-            let tempMoment = moment().add(1, 'days');
-            return this.tasks.filter(task => moment(task.due).isSame(tempMoment, 'day')).filter(task => !task.done)
-        } else {
-          return this.tasks.filter(task => !task.done)
+        if (this.tasks) {
+          if (this.filterKey == 'overdue') {
+              return this.tasks.filter(task => moment(task.due, "YYYY-MM-DD").isBefore(moment(), 'day')).filter(task => !task.done)
+          } else if (this.filterKey == 'today') {
+              return this.tasks.filter(task => moment(task.due, "YYYY-MM-DD").isSame(moment(), 'day')).filter(task => !task.done)
+          } else if (this.filterKey == 'tomorrow') {
+              let tempMoment = moment().add(1, 'days');
+              return this.tasks.filter(task => moment(task.due, "YYYY-MM-DD").isSame(tempMoment, 'day')).filter(task => !task.done)
+          } else {
+            return this.tasks.filter(task => !task.done)
+          }
         }
       },
       // only the done tasks
@@ -135,7 +136,7 @@ export default {
           let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
             return taskToEvaluate.id == taskId; })[0];
 
-          return moment(taskToEvaluate.due).isBefore(moment(), 'day')
+          return moment(taskToEvaluate.due, "YYYY-MM-DD").isBefore(moment(), 'day')
         },
         // return due today state of a given task
         getDueToday(taskId) {
@@ -143,7 +144,7 @@ export default {
           let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
             return taskToEvaluate.id == taskId; })[0];
           
-          return moment(taskToEvaluate.due).isSame(moment(), 'day')
+          return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')
         },
         // return due tomorrow state of a given task
         getDueTomorrow(taskId) {
@@ -152,7 +153,7 @@ export default {
             return taskToEvaluate.id == taskId; })[0];
           // create a tomorrow moment object for comparison
           let tempMoment = moment().add(1, 'days');
-          return moment(taskToEvaluate.due).isSame(tempMoment, 'day')
+          return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(tempMoment, 'day')
         },
         // friendly format for display of this task's date
         displayDate(taskId) {
@@ -160,10 +161,10 @@ export default {
           let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
             return taskToEvaluate.id == taskId; })[0];
           let tempDateDisplay = '';
-          if (moment(taskToEvaluate.due).isSame(moment(), 'day')) {
+          if (moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')) {
             tempDateDisplay = "Today";
           } else {
-            tempDateDisplay = moment(taskToEvaluate.due).format("dddd MMMM DD");
+            tempDateDisplay = moment(taskToEvaluate.due, "YYYY-MM-DD").format("dddd MMMM DD");
           }
           // use moment.js to manipulate display
           return tempDateDisplay
