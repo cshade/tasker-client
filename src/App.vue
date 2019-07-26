@@ -103,7 +103,7 @@ export default {
   computed: {
       // only the due tasks, filtered if chosen in the UI
       displayDueTasks() {
-        if (this.tasks) {
+        if (!!this.tasks) {
           if (this.filterKey == 'overdue') {
               return this.tasks.filter(task => moment(task.due, "YYYY-MM-DD").isBefore(moment(), 'day')).filter(task => !task.done)
           } else if (this.filterKey == 'today') {
@@ -124,108 +124,141 @@ export default {
   methods: {
         // sets the showDetail variable to a given task's id
         toggleShowDetail(taskId) {
-          if (this.showDetail == taskId) {
-            this.showDetail = 0;
+          if (!!taskId) {
+            (this.showDetail == taskId) ? this.showDetail = 0 : this.showDetail = taskId;
           } else {
-          this.showDetail = taskId;
+            this.showDetail = 0;
           }
         },
         // return overdue state of a given task
         getOverdue(taskId) {
-          // find this task in the array
-          let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-            return taskToEvaluate.id == taskId; })[0];
+          if (!!taskId) {
+            // find this task in the array
+            let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
+              return taskToEvaluate.id == taskId; })[0];
 
-          return moment(taskToEvaluate.due, "YYYY-MM-DD").isBefore(moment(), 'day')
+            return moment(taskToEvaluate.due, "YYYY-MM-DD").isBefore(moment(), 'day')
+          } else {
+            return false;
+          }
         },
         // return due today state of a given task
         getDueToday(taskId) {
-          // find this task in the array
-          let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-            return taskToEvaluate.id == taskId; })[0];
-          
-          return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')
+          if (!!taskId) {
+            // find this task in the array
+            let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
+              return taskToEvaluate.id == taskId; })[0];
+            
+            return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')
+          } else {
+            return false;
+          }
         },
         // return due tomorrow state of a given task
         getDueTomorrow(taskId) {
-          // find this task in the array
-          let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-            return taskToEvaluate.id == taskId; })[0];
-          // create a tomorrow moment object for comparison
-          let tempMoment = moment().add(1, 'days');
-          return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(tempMoment, 'day')
+          if (!!taskId) {
+            // find this task in the array
+            let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
+              return taskToEvaluate.id == taskId; })[0];
+            // create a tomorrow moment object for comparison
+            let tempMoment = moment().add(1, 'days');
+            return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(tempMoment, 'day')
+          } else {
+            return false;
+          }
         },
         // friendly format for display of this task's date
         displayDate(taskId) {
-          // find this task in the array
-          let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-            return taskToEvaluate.id == taskId; })[0];
-          let tempDateDisplay = '';
-          if (moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')) {
-            tempDateDisplay = "Today";
+          if (!!taskId) {
+            // find this task in the array
+            let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
+              return taskToEvaluate.id == taskId; })[0];
+            let tempDateDisplay = '';
+            if (moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')) {
+              tempDateDisplay = "Today";
+            } else {
+              tempDateDisplay = moment(taskToEvaluate.due, "YYYY-MM-DD").format("dddd MMMM DD");
+            }
+            // use moment.js to manipulate display
+            return tempDateDisplay
           } else {
-            tempDateDisplay = moment(taskToEvaluate.due, "YYYY-MM-DD").format("dddd MMMM DD");
+            console.log("displayDate() error: invalid task id");
+            return "Date format error";
           }
-          // use moment.js to manipulate display
-          return tempDateDisplay
         },
         // create a new task in the system, via the Task API
         addTask() {
-          // clean date format
-          this.newTaskDue = moment(this.newTaskDue).format('YYYY-MM-DD');
+          // confirm that we have data for a new task
+          if (!!this.newTaskName &&
+              !!this.newTaskDescr && 
+              !!this.newTaskDue) {
 
-          axios.post( taskBaseURI + '/add' , {
-                name: this.newTaskName,
-                description: this.newTaskDescr,
-                due: this.newTaskDue
-                })
-              .then( response => {
-              console.log(`NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
-              this.tasks = response.data
-            })
-            .catch(function (error) {
-              console.log(error);
-            })        
+            // clean date format
+            this.newTaskDue = moment(this.newTaskDue).format('YYYY-MM-DD');
 
-          // clear form fields
-          this.newTaskName = '';
-          this.newTaskDescr = '';
-          this.newTaskDue = '';
+            axios.post( taskBaseURI + '/add' , {
+                  name: this.newTaskName,
+                  description: this.newTaskDescr,
+                  due: this.newTaskDue
+                  })
+                .then( response => {
+                console.log(`addTask(): NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
+                this.tasks = response.data
+              })
+              .catch(function (error) {
+                console.log(error);
+              })        
+
+            // clear form fields
+            this.newTaskName = '';
+            this.newTaskDescr = '';
+            this.newTaskDue = '';
+          } else {
+            console.log("addTask() error: expected new task values not present ")
+          }
         },
         // toggles the "done" state of a given task, via the Task API
         toggleDone(taskId) {
-          // find the task in the array
-          let taskToUpdate = this.tasks.filter( taskToUpdate => {
-            return taskToUpdate.id == taskId; })[0];
-          taskToUpdate.done = !taskToUpdate.done;
+          if (!!taskId) {
+            // find the task in the array
+            let taskToUpdate = this.tasks.filter( taskToUpdate => {
+              return taskToUpdate.id == taskId; })[0];
+            taskToUpdate.done = !taskToUpdate.done;
 
-          const config = {
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            }
-          };
-          axios.post( 
-              taskBaseURI + '/update/' + taskId, 
-              taskToUpdate,
-              config)
-            .then( response => {
-              console.log(`NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
-              this.tasks = response.data
-            })
-            .catch(function (error) {
-              console.log(error);
-            })        
+            const config = {
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+              }
+            };
+            axios.post( 
+                taskBaseURI + '/update/' + taskId, 
+                taskToUpdate,
+                config)
+              .then( response => {
+                console.log(`toggleDone(): NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
+                this.tasks = response.data
+              })
+              .catch(function (error) {
+                console.log(error);
+              })
+          } else {
+            console.log("toggleDone() error: invalid task id");
+          }
         },
         deleteTask(taskId) {
-          axios.delete( taskBaseURI + '/delete/' + taskId)
-              .then( response => {
-              console.log(`NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
-              this.tasks = response.data
-            })
-            .catch(function (error) {
-              console.log(error);
-            })        
+          if (!!taskId) {
+            axios.delete( taskBaseURI + '/delete/' + taskId)
+                .then( response => {
+                console.log(`deleteTask(): NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
+                this.tasks = response.data
+              })
+              .catch(function (error) {
+                console.log(error);
+              })        
+          } else {
+            console.log("deleteTask() error: invalid task id");
+          }
         },
     },
   // retrieve all the existing tasks via the Task API
@@ -234,7 +267,11 @@ export default {
             .then(response => {
               console.log(JSON.stringify(response.data))
               this.tasks = response.data}
-            );
+          )
+          .catch(function (error) {
+            console.log("mounted: error communicating with Task API");
+            console.log(error);
+          });
   },
 }
 </script>
