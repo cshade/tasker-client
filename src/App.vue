@@ -59,6 +59,7 @@
 
   <h2>Create a New Task</h2>
     <ul>
+      <li class="error" v-show="createFormError">{{ createFormErrorMsg }}
       <li>Task Name: <input id="new-task-name" type="text" v-model.trim="newTaskName" placeholder="Task Name"></li>
       <li>Description: <input id="new-task-descr" type="text" v-model.trim="newTaskDescr" placeholder="Description"></li>
       <li>Due: <input id="new-task-due" type=date v-model.trim="newTaskDue"></li>
@@ -98,6 +99,10 @@ export default {
 
       // a task id, for display of its detail
       showDetail: '0',
+
+      // create task form error message
+      createFormError: false,
+      createFormErrorMsg: '',
     }
   },
   computed: {
@@ -213,7 +218,10 @@ export default {
             this.newTaskName = '';
             this.newTaskDescr = '';
             this.newTaskDue = '';
+            this.createFormError = false; // clear any error message
           } else {
+            this.createFormError = true;
+            this.createFormErrorMsg = 'Please complete the form to create a task.';
             console.log("addTask() error: expected new task values not present ")
           }
         },
@@ -311,7 +319,7 @@ button {
   margin: 5px 5px;
 }
 
-.overdue {
+.overdue, .error {
   color: #dc3545;
   font-weight: 700;
 }
