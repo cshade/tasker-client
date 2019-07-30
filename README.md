@@ -2,7 +2,7 @@
 
 The UI of a simple task management tool, allowing an end user to create, manage and delete tasks using a web interface.
 
-> Together with its separate Task API project, this is a demo of a Node.js, Vue.js, RESTful API microservices application.
+> Together with its separate Task API project, this is a demo of a containerized Node.js, Vue.js, MongoDB, RESTful API microservices application.
 
 ## Build and Run
 
@@ -23,7 +23,7 @@ This project assumes that the Task API is running at http://localhost:8082/api/t
 - [axios](https://www.npmjs.com/package/axios): Promise based HTTP client
 - [Bootstrap](https://getbootstrap.com/): Front-end framework along with [BootstrapVue](BootstrapVue), [JQuery](https://jquery.com/)
 - [Moment.js](https://momentjs.com/): Parse, validate, manipulate, and display dates and times
-- Docker, Docker Compose (see Deployment below)
+- Docker and Docker Compose containerization (see Deployment Notes below)
 
 ## Deployment Notes
 Both the front- and back-end projects of this demo are designed to run as multi-container Docker applications, within Docker Compose. Each project has a YAML file `docker-compose.yml` to configure the application's services as well as a Docker config file `Dockerfile`. From within the root directory of the project, you enter the single command of `docker-compose up` to create and start the services from the configuration.

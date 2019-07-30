@@ -10,9 +10,7 @@ Vue.use(BootstrapVue)
 Vue.component('detail-display', {
 	props: ['task',],
 	template: `<ul>
-          <li>Task No.: {{ task.id }}</li>
           <li>Description: {{ task.description }}</li>
-          <li>Due: {{ task.due }}</li>
         </ul>`,
 })
 

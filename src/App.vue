@@ -7,15 +7,15 @@
 
   <ul>
     <li v-show="displayDueTasks.length == 0">There are no tasks to display.
-    <li v-for="(task, index) in displayDueTasks">
-      <button class="btn btn-dark btn-sm" v-on:click="toggleDone(task.id)">done</button>
-      <strong>{{ task.name }}</strong>, <span v-bind:class="{ 'due-today': getDueToday(task.id), 'overdue': getOverdue(task.id) }">Due {{ displayDate(task.id) }}</span>
-      <button class="btn btn-light btn-sm" v-on:click="toggleShowDetail(task.id)">details</button>
+    <li v-for="(task, index) in displayDueTasks" :key="index">
+      <button class="btn btn-dark btn-sm" v-on:click="toggleDone(task._id)">done</button>
+      <strong>{{ task.name }}</strong>, <span v-bind:class="{ 'due-today': getDueToday(task._id), 'overdue': getOverdue(task._id) }">Due {{ displayDate(task._id) }}</span>
+      <button class="btn btn-light btn-sm" v-on:click="toggleShowDetail(task._id)">details</button>
 
       <detail-display
-        v-show="showDetail == task.id"
+        v-show="showDetail == task._id"
         v-bind:task="task"
-        v-bind:key="task.id">
+        v-bind:key="task._id">
       </detail-display>
 
     </li>
@@ -49,8 +49,8 @@
     <ul>
       <li v-show="displayDoneTasks.length == 0">There are no tasks marked as done.</li>
       <li v-for="(task, index) in displayDoneTasks">
-        <button class="btn btn-dark btn-sm" v-on:click="deleteTask(task.id)">delete</button>
-        <button class="btn btn-light btn-sm" v-on:click="toggleDone(task.id)">not done</button>
+        <button class="btn btn-dark btn-sm" v-on:click="deleteTask(task._id)">delete</button>
+        <button class="btn btn-light btn-sm" v-on:click="toggleDone(task._id)">not done</button>
         {{ task.name }}
       </li>
     </ul>
@@ -77,7 +77,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import moment from 'moment'
 
 // URI of the Task API
-const taskBaseURI = 'http://localhost:8082/api/tasks'
+const taskBaseURI = 'http://localhost:8082/api/task'
 
 export default {
   name: 'app',
@@ -140,7 +140,7 @@ export default {
           if (!!taskId) {
             // find this task in the array
             let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-              return taskToEvaluate.id == taskId; })[0];
+              return taskToEvaluate._id == taskId; })[0];
 
             return moment(taskToEvaluate.due, "YYYY-MM-DD").isBefore(moment(), 'day')
           } else {
@@ -152,7 +152,7 @@ export default {
           if (!!taskId) {
             // find this task in the array
             let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-              return taskToEvaluate.id == taskId; })[0];
+              return taskToEvaluate._id == taskId; })[0];
             
             return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')
           } else {
@@ -164,7 +164,7 @@ export default {
           if (!!taskId) {
             // find this task in the array
             let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-              return taskToEvaluate.id == taskId; })[0];
+              return taskToEvaluate._id == taskId; })[0];
             // create a tomorrow moment object for comparison
             let tempMoment = moment().add(1, 'days');
             return moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(tempMoment, 'day')
@@ -177,7 +177,7 @@ export default {
           if (!!taskId) {
             // find this task in the array
             let taskToEvaluate = this.tasks.filter( taskToEvaluate => {
-              return taskToEvaluate.id == taskId; })[0];
+              return taskToEvaluate._id == taskId; })[0];
             let tempDateDisplay = '';
             if (moment(taskToEvaluate.due, "YYYY-MM-DD").isSame(moment(), 'day')) {
               tempDateDisplay = "Today";
@@ -206,13 +206,13 @@ export default {
                   description: this.newTaskDescr,
                   due: this.newTaskDue
                   })
-                .then( response => {
-                console.log(`addTask(): NEW COMPLETE SET OF TASKS:\n` + JSON.stringify(response.data));
+              .then( response => {
+                console.log(`addTask(): RESPONSE:\n` + JSON.stringify(response.data));
                 this.tasks = response.data
               })
               .catch(function (error) {
                 console.log(error);
-              })        
+              })
 
             // clear form fields
             this.newTaskName = '';
@@ -230,7 +230,7 @@ export default {
           if (!!taskId) {
             // find the task in the array
             let taskToUpdate = this.tasks.filter( taskToUpdate => {
-              return taskToUpdate.id == taskId; })[0];
+              return taskToUpdate._id == taskId; })[0];
             taskToUpdate.done = !taskToUpdate.done;
 
             const config = {
@@ -271,7 +271,7 @@ export default {
     },
   // retrieve all the existing tasks via the Task API
   mounted: function () {
-      axios.get(taskBaseURI)
+      axios.get(taskBaseURI+'/all')
             .then(response => {
               console.log(JSON.stringify(response.data))
               this.tasks = response.data}
