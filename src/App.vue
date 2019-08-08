@@ -77,7 +77,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import moment from 'moment'
 
 // URI of the Task API
-const taskBaseURI = 'http://localhost:8082/api/task'
+axios.defaults.baseURL = 'http://localhost:8082/api/task';
 
 export default {
   name: 'app',
@@ -191,7 +191,7 @@ export default {
             // clean date format
             this.newTaskDue = moment(this.newTaskDue).format('YYYY-MM-DD');
 
-            axios.post( taskBaseURI + '/add' , {
+            axios.post('/add' , {
                   name: this.newTaskName,
                   description: this.newTaskDescr,
                   due: this.newTaskDue
@@ -245,7 +245,7 @@ export default {
               }
             };
             axios.post( 
-                taskBaseURI + '/update/' + taskId, 
+                '/update/' + taskId, 
                 taskToUpdate,
                 config)
               .then( response => {
@@ -276,7 +276,7 @@ export default {
         },
         deleteTask(taskId = 0) {
           if (taskId != 0) {
-            axios.delete( taskBaseURI + '/delete/' + taskId)
+            axios.delete('/delete/' + taskId)
                 .then( response => {
                 console.log(`deleteTask(): NEW COMPLETE SET OF TASKS:\n ${JSON.stringify(response.data)}`);
                 this.tasks = response.data
@@ -306,7 +306,7 @@ export default {
     },
   // retrieve all the existing tasks via the Task API
   mounted: function () {
-      axios.get(taskBaseURI+'/all')
+      axios.get('/all')
             .then(response => {
               console.log(JSON.stringify(response.data))
               this.tasks = response.data}
